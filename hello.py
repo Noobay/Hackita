@@ -18,7 +18,7 @@ def fa(foo):
 # X bottles of beer on the wall
 @route('/beers/<bottle_num>')
 def beers(bottle_num=100):
-    template('{{a}} bottles of beer on the wall, {{a}} bottles of beer. \nTake one down, pass it around, {{b}} bottles of beer on the wall...',a=str(bottle_num),b=str(bottle_num-1))
+    template('{{a}} bottles of beer on the wall, {{a}} bottles of beer. \nTake one down, pass it around, {{b}} bottles of beer on the wall...', a=str(bottle_num), b=str(bottle_num-1))
     beers(bottle_num-1) if bottle_num > 1 else None
 
 
@@ -54,11 +54,13 @@ u'ן'    :700,
 u'ף'    :800,
 u'ץ'    :900
 }
+
+
     value = 0
     for char in word:
         if char in gematria:
             value += gematria[char]
-    return template('equals {{v}} in gimetria', v=value)
+    return 'equals {0} in gematria'.format(value)
 
 
 @route('/palin/<word>')
