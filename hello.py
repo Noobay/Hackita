@@ -61,7 +61,7 @@ def is_palindrome(word):
     return (word == word[::-1])
 
 def mult_list(number):
-    
+    pass
 if __name__ == '__main__':
     h_world()
     h_foo('worlds')
