@@ -1,23 +1,30 @@
 # encoding=utf-8
 from string import maketrans
+from bottle import run, route, template, request
+
 
 # hello world function
-def h_world():
+@route('/hello world')
+def helloworld():
     print('hello world')
 
 
-# helello world with input
-def h_foo(foo):
-    print('hello {}'.format(foo))
+# hello world with input
+@route('/fa/<foo>')
+def fa(foo):
+   return template('<b>hello {{name}}</b>', name=foo)
 
 
 # X bottles of beer on the wall
-def beer_ot_wall(bottle_num=100):
-    print('{0} bottles of beer on the wall, {0} bottles of beer. \nTake one down, pass it around, {1} bottles of beer on the wall...'.format(str(bottle_num),str(bottle_num-1)))
-    beer_ot_wall(bottle_num-1) if bottle_num > 1 else None
+@route('/beers/<bottle_num>')
+def beers(bottle_num=100):
+    template('{{a}} bottles of beer on the wall, {{a}} bottles of beer. \nTake one down, pass it around, {{b}} bottles of beer on the wall...',a=str(bottle_num),b=str(bottle_num-1))
+    beers(bottle_num-1) if bottle_num > 1 else None
 
 
+@route('/gematria/<word>')
 def gematria_dict(word):
+    word = unicode(word, 'utf-8')
     gematria = {
 u'א':	1,
 u'ב'	:2,
@@ -51,24 +58,22 @@ u'ץ'    :900
     for char in word:
         if char in gematria:
             value += gematria[char]
-    return value
+    return template('equals {{v}} in gimetria', v=value)
 
 
+@route('/palin/<word>')
 # see if word is a plaindrome, ignore punctuation and loops
 def is_palindrome(word):
     word = word.translate(maketrans('{},.[]()', '        '))
-    print word
-    return (word == word[::-1])
+    if(word == word[::-1]):
+        return template('<b>{{sp}} is a palindrome</b>', sp=word)
+    else:
+        return template('<b>{{sp}} is not a palindrome</b>', sp=word)
 
 def mult_list(number):
     pass
-if __name__ == '__main__':
-    h_world()
-    h_foo('worlds')
-    beer_ot_wall(100)
-    print gematria_dict(u"שלום")
-    print is_palindrome("woooow")
 
 
+run(host='localhost', port=8080)
 
 
