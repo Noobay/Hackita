@@ -1,5 +1,5 @@
 # encoding=utf-8
-
+from string import maketrans
 
 # hello world function
 def h_world():
@@ -54,8 +54,10 @@ u'ץ'    :900
     return value
 
 
-# see if word is a plaindrome
+# see if word is a plaindrome, ignore punctuation and loops
 def is_palindrome(word):
+    word = word.translate(maketrans('{},.[]()', '        '))
+    print word
     return (word == word[::-1])
 
 if __name__ == '__main__':
