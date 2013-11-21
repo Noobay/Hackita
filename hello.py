@@ -3,14 +3,17 @@
 # hello world function
 def h_world():
     print('hello world')
-#
+
+# helello world with input
 def h_foo(foo):
     print('hello {}'.format(foo))
 
+# X bottles of beer on the wall
 def beer_ot_wall(bottle_num=100):
     print('{0} bottles of beer on the wall, {0} bottles of beer. \nTake one down, pass it around, {1} bottles of beer on the wall...'.format(str(bottle_num),str(bottle_num-1)))
     beer_ot_wall(bottle_num-1) if bottle_num > 1 else None
 
+# see if word is a plaindrome
 def is_palindrome(word):
     print word[len(word)-1: 2]
 
