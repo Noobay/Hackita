@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 #
-# Copyright 2007 Google Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +19,8 @@ import os,sys
 from cStringIO import StringIO
 
 webstr = '''
-    <a href=https://github.com/depasonico/bywaf-owasp>check git out! (yay, a pun!)</a>
+    <a href=https://github.com/Noobay/Hackita/tree/master/AppEngine>check git out!</a>(Project)
+    <a href=https://github.com/depasonico/bywaf-owasp>based on this</a>(WAFterpreter)
         <form action="/index" method="post">
             Input: <input name="input" type="text" />
             <input value="input" type="submit" />
