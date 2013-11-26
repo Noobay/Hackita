@@ -566,6 +566,7 @@ class WAFterpreter(Cmd):
 
    def do_clear(self, line):
        """clears stdout"""
+       self.stdout.truncate(0)
        self.stdout.seek(0)
 
    def do_clearhist(self, line):
