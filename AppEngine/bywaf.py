@@ -563,8 +563,17 @@ class WAFterpreter(Cmd):
        try:
            webpage = ulib.urlopen(line)
            page_code = webpage.read()
-           if line.endswith('.html'):
-               str.replace('.html', '/')
+
+
+           if 'html' in line:
+               url = line.split('/')
+               line = ''
+               for section in url:
+                   if '.html' in section:
+                       section = ''
+
+               line += ('/'+section)
+
            if 'cgi-bin' in page_code:
                page_code = page_code.replace('cgi-bin', line+'/'+'cgi-bin')
            if 'src="/' in page_code:
