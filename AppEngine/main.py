@@ -72,7 +72,7 @@ webstr = '''
 
     '''
 
-out_textarea = '{0} <pre> <textarea disabled> {1} </textarea>  </pre> '
+out_textarea = '{0} <pre> <textarea readonly> {1} </textarea>  </pre> '
 out_normal = '{0} <pre>  {1}  </pre>'
 
 
