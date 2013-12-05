@@ -40,7 +40,9 @@ style = '''
     background:-webkit-linear-gradient(#F9EFAF, #F7E98D);
     height:100%;
     }
+
     input{
+    outline:none;
     border:1px solid #000000;
     border-radius:8px;
     box-shadow:5px 4px 6px rgba(0,0,0,0.1);
@@ -50,7 +52,6 @@ style = '''
     background:-moz-linear-gradient(#FFF000, #DDD000);
     background:-webkit-linear-gradient(#FFF000, #DDD000);
     padding:3px;
-
     }
 
     input:hover, textarea:hover {
