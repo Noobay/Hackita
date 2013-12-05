@@ -12,11 +12,10 @@ from cmd import Cmd
 import sys
 import string
 import imp # for loading other modules
-import os.path
 import os
 from google.appengine.api import users
 from google.appengine.ext import db
-import datetime
+
 
 
 
@@ -26,11 +25,13 @@ DEFAULT_PLUGIN_PATH = "./"
 # history file name
 DEFAULT_HISTORY_FILENAME = "bywaf-history.txt"
 
+# DB entity class
 class User(db.Model):
             user = db.StringProperty(required=False)
             history = db.StringProperty(required=False)
             date = db.DateProperty(auto_now_add=True)
             time = db.IntegerProperty()
+
 # Interactive shell class
 class WAFterpreter(Cmd):
 
@@ -55,7 +56,7 @@ class WAFterpreter(Cmd):
       self.current_plugin = None
       self.current_plugin_name = ''
 
-    #set up db user
+      #set up db user
       self.order = 0
       # create host information database
 
@@ -197,6 +198,7 @@ class WAFterpreter(Cmd):
        self.delegate_input_handler = None
 
    # set an option's value.  Called by do_set()
+     # set an option's value.  Called by do_set()
    def set_option(self, name, value):
 
        # retrieve the option (it's a tuple)
@@ -204,24 +206,26 @@ class WAFterpreter(Cmd):
 
        # defer first to the specific setter callback, if it exists
        try:
-           setter_func = getattr(self.current_plugin, 'get_'+name)
+           setter_func = getattr(self.current_plugin, 'set_'+name)
            setter_func(name, value)
 
        # specific option setter callback doesn't exist,  so do a straight assignment
        except AttributeError:
-           # construct a new option tuple and set the option to it
 
+#           self.print_line('raised AttributeError trying to call a set_{}'.format(name))
+           # construct a new option tuple and set the option to it
            try:
                self.current_plugin.set_default(name, value)
            except AttributeError:
+#               self.print_line('raised AttributeError trying to call a set_default({})'.format(name))
 
                # default option setter doesn't exist; fall back to a direct assignment
                self.current_plugin.options[name] = value, _defaultvalue, _required, _descr
 
 
 
-   # physically load a module (called from do_import)
-   # implementation adapted from http://stackoverflow.com/questions/301134/dynamic-module-import-in-python
+     # physically load a module (called from do_import)
+     # implementation adapted from http://stackoverflow.com/questions/301134/dynamic-module-import-in-python
    def _load_module(self, filepath):
 
        py_mod = None
@@ -288,6 +292,7 @@ class WAFterpreter(Cmd):
 
        filepath = _filepath.strip()
 
+
        try:
            new_module_name, new_module = self._load_module(filepath)
        except Exception as e:
@@ -348,7 +353,10 @@ class WAFterpreter(Cmd):
            except AttributeError:  # complete__ not found
                pass
            #print intro message
-           self.print_line(new_module.intro)
+           try:
+               self.print_line(new_module.intro)
+           except Exception as e:
+               self.print_line(e)
 
    def complete_use(self,text,line,begin_idx,end_idx):
        return self.filename_completer(text, line, begin_idx, end_idx, root_dir=self.global_options['PLUGIN_PATH'])
@@ -391,41 +399,35 @@ class WAFterpreter(Cmd):
        self.print_line('{} => {}'.format(name, value))
 
    #sets plugin parameters, takes the format of 'set NAME_1=VALUE_1 NAME_2=VALUE_2 ...'
-   def do_set(self, arg):
-       """set plugin variables."""
+
+   #sets plugin parameters, takes the format of 'set NAME_1=VALUE_1 NAME_2=VALUE_2 ...'
+   def do_set(self,arg):
+       """set a plugin's local variable.  This command takes the form 'set VARNAME=VALUE VARNAME2=VALUE2 ... VARNAME=VALUEN.  Values can be enclosed in single- and double-quotes'."""
+
+       # line taken from http://stackoverflow.com/questions/16710076/python-split-a-string-respect-and-preserve-quotes
+       items = re.findall(r'(?:[^\s,"]|"(?:\\.|[^"])*")+', arg)
+
        if not self.current_plugin:
-           self.print_line('no plugin selected')
+           self.print_line('no plugin selected; you must first select a plugin with the "use" command.')
            return
 
-       opt_count = arg.count('=')
-
-       if opt_count == 0:
+       if  len(items)==0:
            self.print_line('no option set')
            return
 
-       #set varibles to store options
-       name, value, next_name = ('', '', '', '')
+       for i in items:
+           key, value = string.split(i, '=', maxsplit=1)  # only split up to the first '='
 
-       #is it only one 'set' ?
-       if opt_count == 1:
-           name,value = arg.split('=')
-           self.go_set(name, value)
+           # remove double- and single-quotes from the split string, if it has any
+           if (value.startswith('\'') and value.endswith('\'')) or (value.startswith('"') and value.endswith('"')):
+               value = value[1:-1]
 
-       elif opt_count > 1:
-           for i, param in enumerate(arg.split('=')):
-
-               #we get a list of format: [name],[value name]...[value]
-               param_length = len(param.split())
-
-               #if it's the beginning, we will only fetch one variable- 'name'
-               if param_length > 1:
-                   value, next_name = param.split()
-                   self.set(name, value)
-               elif i==0:
-                   name = param
-               elif param_length == 1:
-                   value = param
-                   self.set(next_name, value)
+           # set the option
+           try:
+               self.print_line('{} => {}'.format(key, value))
+               self.set_option(key, value)
+           except AttributeError:
+               self.print_line('Unknown plugin option "{}"'.format(key))
 
    # completion function for the do_set command: return available option names
    def complete_set(self,text,line,begin_idx,end_idx):
@@ -571,7 +573,7 @@ class WAFterpreter(Cmd):
 
    def do_clearhist(self, line):
        """clear history"""
-       db.delete(db.Query(keys_only=True))
+       db.delete(db.Query())
 
    def save_history_db(self, entry):
        self.order += 1
@@ -610,7 +612,7 @@ def interpreter_loop():
     # handle an exception
     except Exception as e:
 
-        print('\nerror encountered, continue[Any-Key], show stack trace and continue[SC], show stack trace and quit[S]')
+        wafterpreter.print_line('\nerror encountered, continue[Any-Key], show stack trace and continue[SC], show stack trace and quit[S]')
 
         # python2/3 compatibility check
         try:
@@ -627,11 +629,11 @@ def interpreter_loop():
 
         # show stack trace and continue
         elif answer == 'SC' or answer == 'sc':
-            print("failed")
+            wafterpreter.print_line("failed")
 
         #present the error briefly
         else:
-            print('{}\n'.format(e))
+            wafterpreter.print_line('{}\n'.format(e))
 
     #we don't want to show the user the welcome message again.
     wafterpreter.intro = ''

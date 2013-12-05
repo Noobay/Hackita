@@ -13,19 +13,69 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from bottle import request, route,template, get, post, default_app
+from bottle import request, get, post, default_app
 from bywaf import WAFterpreter
-import os,sys
+from urllib2 import urlopen
+import sys
 from cStringIO import StringIO
 
+style = '''
+
+    <style>
+    textarea{
+    width:100%;
+    display:block;
+    max-width:100%;
+    line-height:1.5;
+    padding:15px 15px 30px;
+    border-radius:3px;
+    border:1px solid #F7E98D;
+    transition:box-shadow 0.5s ease;
+    box-shadow:0 4px 6px rgba(0,0,0,0.1);
+    font-smoothing:subpixel-antialiased;
+    background:linear-gradient(#F9EFAF, #F7E98D);
+    background:-o-linear-gradient(#F9EFAF, #F7E98D);
+    background:-ms-linear-gradient(#F9EFAF, #F7E98D);
+    background:-moz-linear-gradient(#F9EFAF, #F7E98D);
+    background:-webkit-linear-gradient(#F9EFAF, #F7E98D);
+    height:100%;
+    }
+    input{
+    border:1px solid #000000;
+    border-radius:8px;
+    box-shadow:5px 4px 6px rgba(0,0,0,0.1);
+    background:linear-gradient(#FFF000, #DDD000);
+    background:-o-linear-gradient(#FFF000, #DDD000);
+    background:-ms-linear-gradient(#FFF000, #DDD000);
+    background:-moz-linear-gradient(#FFF000, #DDD000);
+    background:-webkit-linear-gradient(#FFF000, #DDD000);
+    padding:3px;
+
+    }
+
+    input:hover, textarea:hover {
+    color:#fff;
+    background:#123123;
+    text-decoration:underline;
+    }
+    </style>
+
+    '''
 webstr = '''
+
     <a href=https://github.com/Noobay/Hackita/tree/master/AppEngine>check git out!</a>(Project)
     <a href=https://github.com/depasonico/bywaf-owasp>based on this</a>(WAFterpreter)
         <form action="/index" method="post">
-            Input: <input name="input" type="text" />
-            <input value="input" type="submit" />
+            Enter a command <input name="cmd" type="text" />
+            <input value="cmd" type="submit" />
         </form>
+
     '''
+
+out_textarea = '{0} <pre> <textarea disabled> {1} </textarea>  </pre> '
+out_normal = '{0} <pre>  {1}  </pre>'
+
+
 @get('/index')# or @route('/')
 def web_input():
     return webstr
@@ -33,7 +83,7 @@ def web_input():
 
 @post('/index')
 def proc_input():
-    w_input = request.forms.get('input')
+    w_input = request.forms.get('cmd')
 
 
     args = w_input.split(' ', 1)
@@ -48,10 +98,11 @@ def proc_input():
         return 'no such function exists'
     except IndexError:
         return 'try another function'
+
     newfunc(args[1])
     wafterpreter.save_history_db(w_input)
 
-    return '{0} <plaintext> {1}'.format(webstr, waf_out.getvalue())
+    return out_textarea.format(style+webstr, waf_out.getvalue())
 
 
 
