@@ -15,8 +15,7 @@ import imp # for loading other modules
 import os
 from google.appengine.api import users
 from google.appengine.ext import db
-
-
+import urllib2 as ulib
 
 
 # path to the root of the plugins directory
@@ -559,6 +558,19 @@ class WAFterpreter(Cmd):
          elif words[1]=='options':
              opts = self.current_plugin.options.keys()
              return self.simplecompleter(words, opts, level=2)
+
+   def do_load(self, line):
+       try:
+           webpage = ulib.urlopen(line)
+           page_code = webpage.read()
+           if 'cgi-bin' in page_code:
+               page_code = page_code.replace('cgi-bin', line+'/'+'cgi-bin')
+           if 'src="/' in page_code:
+               page_code = page_code.replace('src="/', 'src="'+line)
+           self.stdout.write('</textarea> {0} <textarea>'.format(page_code))
+       except Exception as e:
+           self.stdout.write(e)
+           self.stdout.write('\n'+'operation failed')
 
 
    def do_shell(self, line):

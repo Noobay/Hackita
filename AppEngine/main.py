@@ -57,7 +57,6 @@ style = '''
     input:hover, textarea:hover {
     color:#fff;
     background:#123123;
-    text-decoration:underline;
     }
     </style>
 
@@ -104,10 +103,6 @@ def proc_input():
     wafterpreter.save_history_db(w_input)
 
     return out_textarea.format(style+webstr, waf_out.getvalue())
-
-
-
-
 
 
 #set up wafterperter
